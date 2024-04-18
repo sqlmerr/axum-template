@@ -4,6 +4,10 @@ use axum::{
 use std::net::SocketAddr;
 
 mod routes;
+pub mod models;
+pub mod db;
+pub mod schemas;
+pub mod utils;
 
 #[tokio::main]
 async fn main() {
