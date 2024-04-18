@@ -1,6 +1,6 @@
-use sea_orm::entity::prelude::*;
 use sea_orm::entity::prelude::DeriveEntityModel;
-use serde::{Serialize, Deserialize};
+use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "task")]
@@ -13,6 +13,5 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
-
 
 impl ActiveModelBehavior for ActiveModel {}

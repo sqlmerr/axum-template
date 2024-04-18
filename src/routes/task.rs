@@ -1,16 +1,16 @@
 use axum::{
+    extract::{Path, Query},
+    http::StatusCode,
     response::{IntoResponse, Json},
-    extract::{Query, Path},
-    http::{StatusCode}
 };
-use sea_orm::{ActiveModelTrait, Set, EntityTrait};
+use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde_json::json;
 
 use crate::{
     db::db_connection,
     models::task::{self, Entity as Task},
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
-    utils::error::APIError
+    utils::error::APIError,
 };
 
 pub async fn get_all_tasks() -> impl IntoResponse {
@@ -23,7 +23,10 @@ pub async fn get_task(Path(id): Path<i32>) -> Result<impl IntoResponse, APIError
     let db = db_connection().await.unwrap();
     let task = Task::find_by_id(id).one(&db).await.unwrap();
     if task.is_none() {
-        return Err(APIError { message: format!("Task with id {} not found", id), status_code: StatusCode::NOT_FOUND })
+        return Err(APIError {
+            message: format!("Task with id {} not found", id),
+            status_code: StatusCode::NOT_FOUND,
+        });
     }
     Ok(Json(json!(task)))
 }
@@ -39,7 +42,7 @@ pub async fn create_task(Json(task): Json<CreateTaskSchema>) -> impl IntoRespons
 
     (
         StatusCode::CREATED,
-        Json(json!({"id": task.id, "title": task.title}))
+        Json(json!({"id": task.id, "title": task.title})),
     )
 }
 

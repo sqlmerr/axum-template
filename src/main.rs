@@ -1,11 +1,9 @@
-use axum::{
-    Router
-};
+use axum::Router;
 use std::net::SocketAddr;
 
-mod routes;
-pub mod models;
 pub mod db;
+pub mod models;
+mod routes;
 pub mod schemas;
 pub mod utils;
 
