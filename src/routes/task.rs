@@ -13,12 +13,30 @@ use crate::{
     utils::error::APIError,
 };
 
+#[utoipa::path(
+    get,
+    path = "/tasks",
+    responses(
+        (status = 200, description = "Tasks")
+    )
+)]
 pub async fn get_all_tasks() -> impl IntoResponse {
     let db = db_connection().await.unwrap();
     let tasks = Task::find().all(&db).await.unwrap();
     Json(json!(tasks))
 }
 
+#[utoipa::path(
+    get,
+    path = "/task/{id}",
+    responses(
+        (status = 200, description = "task found successfully"),
+        (status = 404, description = "task not found")
+    ),
+    params(
+        ("id" = i32, Path, description = "Task id from database")
+    )
+)]
 pub async fn get_task(Path(id): Path<i32>) -> Result<impl IntoResponse, APIError> {
     let db = db_connection().await.unwrap();
     let task = Task::find_by_id(id).one(&db).await.unwrap();
@@ -31,6 +49,14 @@ pub async fn get_task(Path(id): Path<i32>) -> Result<impl IntoResponse, APIError
     Ok(Json(json!(task)))
 }
 
+#[utoipa::path(
+    post,
+    path = "/task",
+    responses(
+        (status = 201, description = "Task created successfully")
+    ),
+    request_body = CreateTaskSchema
+)]
 pub async fn create_task(Json(task): Json<CreateTaskSchema>) -> impl IntoResponse {
     let db = db_connection().await.unwrap();
     let task = task::ActiveModel {
@@ -46,6 +72,16 @@ pub async fn create_task(Json(task): Json<CreateTaskSchema>) -> impl IntoRespons
     )
 }
 
+#[utoipa::path(
+    delete,
+    path = "/task/{id}",
+    responses(
+        (status = 200, description = "Task deleted successfully")
+    ),
+    params(
+        ("id" = i32, Path, description = "Task id from database")
+    )
+)]
 pub async fn delete_task(Path(id): Path<i32>) -> Result<impl IntoResponse, StatusCode> {
     let db = db_connection().await.unwrap();
     Task::delete_by_id(id).exec(&db).await.unwrap();
