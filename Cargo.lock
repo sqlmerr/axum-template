@@ -166,20 +166,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-architecture"
-version = "0.1.0"
-dependencies = [
- "axum",
- "dotenvy",
- "sea-orm",
- "serde",
- "serde_json",
- "tokio",
- "utoipa",
- "utoipa-swagger-ui",
-]
-
-[[package]]
 name = "axum-core"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -198,6 +184,20 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "axum-template"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "dotenvy",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "tokio",
+ "utoipa",
+ "utoipa-swagger-ui",
 ]
 
 [[package]]
