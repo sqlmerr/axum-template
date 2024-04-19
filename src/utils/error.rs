@@ -4,8 +4,9 @@ use axum::{
     Json,
 };
 use serde_json::json;
+use utoipa::ToSchema;
 
-#[derive(Debug)]
+#[derive(Debug, ToSchema)]
 pub struct APIError {
     pub message: String,
     pub status_code: StatusCode,

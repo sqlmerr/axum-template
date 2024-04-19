@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, Query},
+    extract::Path,
     http::StatusCode,
     response::{IntoResponse, Json},
 };
@@ -88,22 +88,38 @@ pub async fn delete_task(Path(id): Path<i32>) -> Result<impl IntoResponse, Statu
     Ok(Json(json!({"message": "Task deleted"})))
 }
 
-// pub async fn update_task(
-//     Path(id): Path<i32>,
-//     Json(body): Json<UpdateTaskSchema>,
-// ) -> Result<impl IntoResponse, APIError> {
-//     let db = db_connection().await.unwrap();
-//     let task: Option<task::Model> = Task::find_by_id(id).one(&db).await.unwrap();
-//     if task.is_none() {
-//         return Err(APIError { message: format!("Task with id {} not found", id), status_code: StatusCode::NOT_FOUND })
-//     }
-//
-//     let mut task: task::ActiveModel = task.unwrap().into();
-//     if let Some(title) = task.title {}
-//     task.title = Set(body.title.unwrap().to_owned());
-//     task.description = Set(Some(body.description.unwrap().to_owned()));
-//
-//     let task = task.update(&db).await.unwrap();
-//
-//     Ok(Json(json!({ "message": "Task updated!" })))
-// } TODO: complete
+#[utoipa::path(
+    patch,
+    path = "/task/{id}",
+    responses(
+        (status = 200, description = "Task edited successfully"),
+        (status = 404, description = "Task not found")
+    ),
+    params(
+        ("id" = i32, Path, description = "Task id from database")
+    )
+)]
+pub async fn update_task(
+    Path(id): Path<i32>,
+    Json(body): Json<UpdateTaskSchema>,
+) -> Result<impl IntoResponse, APIError> {
+    let db = db_connection().await.unwrap();
+    let task: Option<task::Model> = Task::find_by_id(id).one(&db).await.unwrap();
+    if task.is_none() {
+        return Err(APIError {
+            message: format!("Task with id {} not found", id),
+            status_code: StatusCode::NOT_FOUND,
+        });
+    }
+
+    let mut task: task::ActiveModel = task.unwrap().into();
+    if let Some(title) = body.title {
+        task.title = Set(title)
+    }
+    if let Some(description) = body.description {
+        task.description = Set(description);
+    }
+
+    task.update(&db).await.unwrap();
+    Ok(Json(json!({ "message": "Task updated!" })))
+}
