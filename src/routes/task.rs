@@ -65,7 +65,7 @@ pub async fn create_task(Json(task): Json<CreateTaskSchema>) -> impl IntoRespons
         ..Default::default()
     };
     let task: task::Model = task.insert(&db).await.unwrap();
-
+    tracing::info!("Successfully created a task: {:?}", task);
     (
         StatusCode::CREATED,
         Json(json!({"id": task.id, "title": task.title})),

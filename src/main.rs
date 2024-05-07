@@ -1,6 +1,5 @@
 use axum::Router;
 use std::net::SocketAddr;
-use log::info;
 
 pub mod db;
 pub mod models;
@@ -10,12 +9,17 @@ pub mod utils;
 
 #[tokio::main]
 async fn main() {
-    pretty_env_logger::init();
+    let subscriber = tracing_subscriber::fmt()
+        .compact()
+        .with_file(true)
+        .with_line_number(true)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let app = Router::new().merge(routes::init_routers());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
-    info!("listening on http://{}", addr);
+    tracing::info!("listening on http://{}", addr);
 
     let server = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(server, app).await.unwrap();
