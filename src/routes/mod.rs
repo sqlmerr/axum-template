@@ -35,11 +35,7 @@ pub fn init_routers() -> Router {
             "/",
             get(|| async { Json(json!({"message": "Hello world"})) }),
         )
-        .route("/task", post(task::create_task))
-        .route("/tasks", get(task::get_all_tasks))
-        .route("/task/:id", get(task::get_task))
-        .route("/task/:id", delete(task::delete_task))
-        .route("/task/:id", patch(task::update_task));
+        .nest("/tasks", task::init_tasks_router());
 
     return root_router;
 }

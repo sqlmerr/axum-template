@@ -1,7 +1,9 @@
+use axum::routing::{delete, get, patch, post};
 use axum::{
     extract::Path,
     http::StatusCode,
     response::{IntoResponse, Json},
+    Router,
 };
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde_json::json;
@@ -28,7 +30,7 @@ pub async fn get_all_tasks() -> impl IntoResponse {
 
 #[utoipa::path(
     get,
-    path = "/task/{id}",
+    path = "/tasks/{id}",
     responses(
         (status = 200, description = "task found successfully"),
         (status = 404, description = "task not found")
@@ -51,7 +53,7 @@ pub async fn get_task(Path(id): Path<i32>) -> Result<impl IntoResponse, APIError
 
 #[utoipa::path(
     post,
-    path = "/task",
+    path = "/tasks",
     responses(
         (status = 201, description = "Task created successfully")
     ),
@@ -74,7 +76,7 @@ pub async fn create_task(Json(task): Json<CreateTaskSchema>) -> impl IntoRespons
 
 #[utoipa::path(
     delete,
-    path = "/task/{id}",
+    path = "/tasks/{id}",
     responses(
         (status = 200, description = "Task deleted successfully")
     ),
@@ -90,7 +92,7 @@ pub async fn delete_task(Path(id): Path<i32>) -> Result<impl IntoResponse, Statu
 
 #[utoipa::path(
     patch,
-    path = "/task/{id}",
+    path = "/tasks/{id}",
     responses(
         (status = 200, description = "Task edited successfully"),
         (status = 404, description = "Task not found")
@@ -122,4 +124,15 @@ pub async fn update_task(
 
     task.update(&db).await.unwrap();
     Ok(Json(json!({ "message": "Task updated!" })))
+}
+
+pub fn init_tasks_router() -> Router {
+    let router = Router::new()
+        .route("/", post(crate::routes::task::create_task))
+        .route("/", get(crate::routes::task::get_all_tasks))
+        .route("/:id", get(crate::routes::task::get_task))
+        .route("/:id", delete(crate::routes::task::delete_task))
+        .route("/:id", patch(crate::routes::task::update_task));
+
+    router
 }
