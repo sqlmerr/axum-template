@@ -12,7 +12,7 @@ use crate::{
     db::db_connection,
     models::task::{self, Entity as Task},
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
-    utils::error::APIError,
+    utils::errors::APIError,
 };
 
 #[utoipa::path(
@@ -128,11 +128,8 @@ pub async fn update_task(
 
 pub fn init_tasks_router() -> Router {
     let router = Router::new()
-        .route("/", post(crate::routes::task::create_task))
-        .route("/", get(crate::routes::task::get_all_tasks))
-        .route("/:id", get(crate::routes::task::get_task))
-        .route("/:id", delete(crate::routes::task::delete_task))
-        .route("/:id", patch(crate::routes::task::update_task));
+        .route("/", post(create_task).get(get_all_tasks))
+        .route("/:id", get(get_task).delete(delete_task).patch(update_task));
 
-    router
+    return router;
 }
