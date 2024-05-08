@@ -7,4 +7,19 @@
 #### 🦀 This is my template for rust web application framework [axum](https://github.com/tokio-rs/axum)
 > Currently, in development...
 
+# Run
+```bash
+git clone https://github.com/sqlmerr/axum-template
+cd axum-template
+cp .env.example .env
+```
 
+```bash
+cargo run
+```
+
+or 
+
+```bash
+docker compose up --build
+```
