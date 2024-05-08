@@ -24,7 +24,7 @@ pub fn init_routers() -> Router {
         components(schemas(
             schemas::task::CreateTaskSchema,
             schemas::task::UpdateTaskSchema,
-            utils::error::APIError
+            utils::errors::APIError
         ))
     )]
     struct ApiDoc;
