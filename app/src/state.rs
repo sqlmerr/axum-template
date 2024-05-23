@@ -1,6 +1,6 @@
-use crate::repositories::task::TaskRepository;
+use crate::services::task::TaskService;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub task_repository: TaskRepository,
+    pub task_service: TaskService,
 }

@@ -10,7 +10,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::state::AppState;
-use crate::{repositories, schemas, state, utils};
+use crate::{repositories, schemas, services, state, utils};
 
 pub fn init_routers() -> Router {
     #[derive(OpenApi)]
@@ -23,6 +23,7 @@ pub fn init_routers() -> Router {
             task::update_task,
         ),
         components(schemas(
+            schemas::task::TaskSchema,
             schemas::task::CreateTaskSchema,
             schemas::task::UpdateTaskSchema,
             utils::errors::APIError
@@ -31,7 +32,10 @@ pub fn init_routers() -> Router {
     struct ApiDoc;
 
     let task_repository = repositories::task::TaskRepository {};
-    let state = AppState { task_repository };
+    let task_service = services::task::TaskService {
+        repository: task_repository,
+    };
+    let state = AppState { task_service };
 
     let root_router = Router::new()
         .merge(SwaggerUi::new("/docs").url("/openapi.json", ApiDoc::openapi()))

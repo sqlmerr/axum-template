@@ -7,7 +7,6 @@ use axum::{
 };
 use serde_json::json;
 use std::fmt::format;
-use std::os::linux::raw::stat;
 
 use crate::{
     db::db_connection,
@@ -26,7 +25,7 @@ use crate::{
     )
 )]
 pub async fn get_all_tasks(State(state): State<AppState>) -> impl IntoResponse {
-    let tasks = state.task_repository.find_all().await;
+    let tasks = state.task_service.find_all_tasks().await;
     Json(json!(tasks))
 }
 
@@ -45,7 +44,7 @@ pub async fn get_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, APIError> {
-    let task = state.task_repository.find_one(&id).await;
+    let task = state.task_service.find_one_task(&id).await;
     if task.is_none() {
         return Err(APIError {
             message: format!("Task with id {} not found", id),
@@ -67,12 +66,9 @@ pub async fn create_task(
     State(state): State<AppState>,
     Json(task): Json<CreateTaskSchema>,
 ) -> impl IntoResponse {
-    let task = state.task_repository.create(task).await;
+    let task = state.task_service.create_task(task).await;
     tracing::info!("Successfully created a task: {:?}", task);
-    (
-        StatusCode::CREATED,
-        Json(json!({"id": task.id, "title": task.title})),
-    )
+    (StatusCode::CREATED, Json(task))
 }
 
 #[utoipa::path(
@@ -88,9 +84,15 @@ pub async fn create_task(
 pub async fn delete_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, StatusCode> {
-    state.task_repository.delete(&id).await;
-    Ok(Json(json!({"message": "Task deleted"})))
+) -> Result<impl IntoResponse, APIError> {
+    let response = state
+        .task_service
+        .delete_task(&id)
+        .await;
+    match response {
+        Ok(_) => Ok(Json(json!({"message": "Task deleted"}))),
+        Err(e) => Err(APIError { message: e.message, status_code: StatusCode::NOT_FOUND })
+    }
 }
 
 #[utoipa::path(
@@ -107,9 +109,9 @@ pub async fn delete_task(
 pub async fn update_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
-    Json(body): Json<UpdateTaskSchema>
+    Json(body): Json<UpdateTaskSchema>,
 ) -> Result<impl IntoResponse, APIError> {
-    let response = state.task_repository.update(&id, body).await;
+    let response = state.task_service.update_task(&id, body).await;
     return match response {
         Ok(_) => Ok(Json(json!({ "message": "Task updated!" }))),
         Err(e) => Err(APIError {
@@ -122,7 +124,7 @@ pub async fn update_task(
 pub fn init_tasks_router() -> Router<AppState> {
     let router = Router::new()
         .route("/", post(create_task).get(get_all_tasks))
-        .route("/:id", get(get_task)); // .delete(delete_task).patch(update_task));
+        .route("/:id", get(get_task).delete(delete_task).patch(update_task));
 
     router
 }

@@ -4,12 +4,21 @@ use crate::schemas::task::{CreateTaskSchema, UpdateTaskSchema};
 use crate::utils::errors::NotFound;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 
+pub struct CreateTaskDTO {
+    pub title: String,
+    pub description: String,
+}
+
+pub struct UpdateTaskDTO {
+    pub title: Option<String>,
+    pub description: Option<String>,
+}
 
 #[derive(Clone)]
-pub struct TaskRepository {}
+pub struct TaskRepository;
 
 impl TaskRepository {
-    pub async fn create(&self, data: CreateTaskSchema) -> task::Model {
+    pub async fn create(&self, data: CreateTaskDTO) -> task::Model {
         let db = db_connection().await.unwrap();
         let task = task::ActiveModel {
             title: Set(data.title),
@@ -21,7 +30,10 @@ impl TaskRepository {
 
     pub async fn find_one(&self, id: &i32) -> Option<task::Model> {
         let db = db_connection().await.unwrap();
-        task::Entity::find_by_id(id.to_owned()).one(&db).await.unwrap()
+        task::Entity::find_by_id(id.to_owned())
+            .one(&db)
+            .await
+            .unwrap()
     }
 
     pub async fn find_all(&self) -> Vec<task::Model> {
@@ -31,10 +43,13 @@ impl TaskRepository {
 
     pub async fn delete(&self, id: &i32) {
         let db = db_connection().await.unwrap();
-        task::Entity::delete_by_id(id.to_owned()).exec(&db).await.unwrap();
+        task::Entity::delete_by_id(id.to_owned())
+            .exec(&db)
+            .await
+            .unwrap();
     }
 
-    pub async fn update(&self, id: &i32, data: UpdateTaskSchema) -> Result<(), NotFound> {
+    pub async fn update(&self, id: &i32, data: UpdateTaskDTO) -> Result<(), NotFound> {
         let db = db_connection().await.unwrap();
         let task = self.find_one(id).await;
         if task.is_none() {

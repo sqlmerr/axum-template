@@ -7,6 +7,7 @@ pub mod models;
 pub mod repositories;
 mod routes;
 pub mod schemas;
+pub mod services;
 pub mod state;
 pub mod utils;
 
@@ -25,8 +26,7 @@ async fn main() {
     Migrator::up(&db, None).await.unwrap(); // Run migrations
 
     // let app = routes::init_routers();
-    let app = Router::new()
-        .merge(routes::init_routers());
+    let app = Router::new().merge(routes::init_routers());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     tracing::info!("listening on http://{}", addr);
