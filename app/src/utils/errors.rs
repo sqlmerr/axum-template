@@ -23,3 +23,8 @@ impl IntoResponse for APIError {
             .into_response()
     }
 }
+
+#[derive(Debug)]
+pub struct NotFound {
+    pub message: String,
+}
