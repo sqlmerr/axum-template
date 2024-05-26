@@ -6,3 +6,6 @@ pub mod schemas;
 pub mod services;
 pub mod state;
 pub mod utils;
+pub mod config;
+
+pub use config::Config;

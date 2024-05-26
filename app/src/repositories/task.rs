@@ -1,7 +1,7 @@
 use crate::db::db_connection;
 use crate::models::task;
 use crate::utils::errors::NotFound;
-use sea_orm::{ActiveModelTrait, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, Set};
 
 pub struct CreateTaskDTO {
     pub title: String,
@@ -14,42 +14,44 @@ pub struct UpdateTaskDTO {
 }
 
 #[derive(Clone)]
-pub struct TaskRepository;
+pub struct TaskRepository {
+    pub db_connection: DbConn
+}
 
 impl TaskRepository {
     pub async fn create(&self, data: CreateTaskDTO) -> task::Model {
-        let db = db_connection().await.unwrap();
+        let db = &self.db_connection;
         let task = task::ActiveModel {
             title: Set(data.title),
             description: Set(data.description),
             ..Default::default()
         };
-        task.insert(&db).await.unwrap()
+        task.insert(db).await.unwrap()
     }
 
     pub async fn find_one(&self, id: &i32) -> Option<task::Model> {
-        let db = db_connection().await.unwrap();
+        let db = &self.db_connection;
         task::Entity::find_by_id(id.to_owned())
-            .one(&db)
+            .one(db)
             .await
             .unwrap()
     }
 
     pub async fn find_all(&self) -> Vec<task::Model> {
-        let db = db_connection().await.unwrap();
-        task::Entity::find().all(&db).await.unwrap()
+        let db = &self.db_connection;
+        task::Entity::find().all(db).await.unwrap()
     }
 
     pub async fn delete(&self, id: &i32) {
-        let db = db_connection().await.unwrap();
+        let db = &self.db_connection;
         task::Entity::delete_by_id(id.to_owned())
-            .exec(&db)
+            .exec(db)
             .await
             .unwrap();
     }
 
     pub async fn update(&self, id: &i32, data: UpdateTaskDTO) -> Result<(), NotFound> {
-        let db = db_connection().await.unwrap();
+        let db = &self.db_connection;
         let task = self.find_one(id).await;
         if task.is_none() {
             return Err(NotFound {
@@ -65,7 +67,7 @@ impl TaskRepository {
             task.description = Set(description);
         }
 
-        task.update(&db).await.unwrap();
+        task.update(db).await.unwrap();
 
         Ok(())
     }
