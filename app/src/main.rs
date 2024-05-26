@@ -1,17 +1,14 @@
-use axum::Router;
 use migration::{Migrator, MigratorTrait};
 use std::net::SocketAddr;
 
 pub mod db;
 pub mod models;
 pub mod repositories;
-mod routes;
+pub mod routes;
 pub mod schemas;
 pub mod services;
 pub mod state;
 pub mod utils;
-
-use state::AppState;
 
 #[tokio::main]
 async fn main() {
@@ -26,7 +23,7 @@ async fn main() {
     Migrator::up(&db, None).await.unwrap(); // Run migrations
 
     // let app = routes::init_routers();
-    let app = Router::new().merge(routes::init_routers());
+    let app = routes::init_routers();
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     tracing::info!("listening on http://{}", addr);

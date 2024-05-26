@@ -1,0 +1,129 @@
+use axum::{
+    body::Body,
+    http::{Request, StatusCode},
+};
+use http_body_util::BodyExt;
+use serde_json::{json, Value};
+use tower::{Service, ServiceExt};
+
+use axum_template::{routes, schemas::task::CreateTaskSchema};
+use axum_template::schemas::task::UpdateTaskSchema;
+
+#[tokio::test]
+async fn test_task_create() {
+    let app = routes::init_routers();
+    let data = CreateTaskSchema {
+        title: "test".to_string(),
+        description: "test_description".to_string(),
+    };
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/tasks")
+                .method("POST")
+                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .body(serde_json::to_string(&data).unwrap())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::CREATED);
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body["title"], "test".to_string());
+    assert_eq!(body["description"], "test_description".to_string());
+}
+
+#[tokio::test]
+async fn test_task_get_from_many() {
+    let app = routes::init_routers();
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/tasks")
+                .method("GET")
+                .body(Body::empty())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body[0]["title"], "test".to_string());
+    assert_eq!(body[0]["description"], "test_description".to_string());
+}
+
+#[tokio::test]
+async fn test_task_get() {
+    let app = routes::init_routers();
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/tasks/1")
+                .method("GET")
+                .body(Body::empty())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body["title"], "test".to_string());
+    assert_eq!(body["description"], "test_description".to_string());
+}
+
+#[tokio::test]
+async fn test_task_update() {
+    let data = UpdateTaskSchema { title: Some("test2".to_string()), description: Some("test_description2".to_string()) };
+
+    let app = routes::init_routers();
+    let response = app.clone()
+        .oneshot(
+            Request::builder()
+                .uri("/tasks/1")
+                .method("PATCH")
+                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .body(serde_json::to_string(&data).unwrap())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body["message"], "Task updated!".to_string());
+
+    let response2 = app.clone()
+        .oneshot(
+            Request::builder()
+                .uri("/tasks/1")
+                .method("GET")
+                .body(Body::empty())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response2.status(), StatusCode::OK);
+
+    let body = response2.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body["title"], "test2".to_string());
+    assert_eq!(body["description"], "test_description2".to_string());
+}

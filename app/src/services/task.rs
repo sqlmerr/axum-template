@@ -1,4 +1,3 @@
-use crate::models::task::Model;
 use crate::repositories::task::{CreateTaskDTO, TaskRepository, UpdateTaskDTO};
 use crate::schemas::task::{CreateTaskSchema, TaskSchema, UpdateTaskSchema};
 use crate::utils::errors::NotFound;
@@ -53,7 +52,9 @@ impl TaskService {
     pub async fn delete_task(&self, id: &i32) -> Result<(), NotFound> {
         let task = self.repository.find_one(id).await;
         if task.is_none() {
-            return Err(NotFound { message: format!("Task with id {id} not found").to_string() })
+            return Err(NotFound {
+                message: format!("Task with id {id} not found").to_string(),
+            });
         }
 
         self.repository.delete(id).await;

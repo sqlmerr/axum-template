@@ -1,16 +1,12 @@
 mod task;
 
-use axum::{
-    response::Json,
-    routing::{delete, get, patch, post},
-    Router,
-};
+use axum::{response::Json, routing::get, Router};
 use serde_json::json;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::state::AppState;
-use crate::{repositories, schemas, services, state, utils};
+use crate::{repositories, schemas, services, utils};
 
 pub fn init_routers() -> Router {
     #[derive(OpenApi)]

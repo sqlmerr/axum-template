@@ -8,13 +8,13 @@ pub struct TaskSchema {
     pub description: String,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct CreateTaskSchema {
     pub title: String,
     pub description: String,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct UpdateTaskSchema {
     pub title: Option<String>,
     pub description: Option<String>,

@@ -1,4 +1,4 @@
-use axum::routing::{delete, get, patch, post};
+use axum::routing::{get, post};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -6,15 +6,11 @@ use axum::{
     Router,
 };
 use serde_json::json;
-use std::fmt::format;
 
 use crate::{
-    db::db_connection,
-    models::task::{self, Entity as Task},
-    repositories::task::TaskRepository,
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
     state::AppState,
-    utils::errors::{APIError, NotFound},
+    utils::errors::APIError,
 };
 
 #[utoipa::path(
@@ -85,13 +81,13 @@ pub async fn delete_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, APIError> {
-    let response = state
-        .task_service
-        .delete_task(&id)
-        .await;
+    let response = state.task_service.delete_task(&id).await;
     match response {
         Ok(_) => Ok(Json(json!({"message": "Task deleted"}))),
-        Err(e) => Err(APIError { message: e.message, status_code: StatusCode::NOT_FOUND })
+        Err(e) => Err(APIError {
+            message: e.message,
+            status_code: StatusCode::NOT_FOUND,
+        }),
     }
 }
 
@@ -122,9 +118,7 @@ pub async fn update_task(
 }
 
 pub fn init_tasks_router() -> Router<AppState> {
-    let router = Router::new()
+    Router::new()
         .route("/", post(create_task).get(get_all_tasks))
-        .route("/:id", get(get_task).delete(delete_task).patch(update_task));
-
-    router
+        .route("/:id", get(get_task).delete(delete_task).patch(update_task))
 }

@@ -1,6 +1,5 @@
 use crate::db::db_connection;
 use crate::models::task;
-use crate::schemas::task::{CreateTaskSchema, UpdateTaskSchema};
 use crate::utils::errors::NotFound;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 

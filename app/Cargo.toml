@@ -5,6 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+path = "src/lib.rs"
+
 [dependencies]
 axum = "0.7.5"
 dotenvy = "0.15.7"
@@ -18,3 +21,7 @@ utoipa = { version="4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 migration = {path = "../migration" }
+tower = "0.4.13"
+http-body-util = "0.1.1"
+http = "1.1.0"
+mime = "0.3.17"
