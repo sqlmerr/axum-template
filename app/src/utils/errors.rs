@@ -28,3 +28,12 @@ impl IntoResponse for APIError {
 pub struct NotFound {
     pub message: String,
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum AppError {
+    #[error("`{entity}` with id `{id}` not found")]
+    EntityNotFound {
+        entity: &'static str,
+        id: i32
+    }
+}

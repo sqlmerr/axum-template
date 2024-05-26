@@ -6,6 +6,7 @@ use axum::{
     Router,
 };
 use serde_json::json;
+use crate::utils::errors::AppError;
 
 use crate::{
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
@@ -17,7 +18,7 @@ use crate::{
     get,
     path = "/tasks",
     responses(
-        (status = 200, description = "Tasks")
+        (status = 200, description = "Tasks", body = Vec<TaskSchema>)
     )
 )]
 pub async fn get_all_tasks(State(state): State<AppState>) -> impl IntoResponse {
@@ -29,7 +30,7 @@ pub async fn get_all_tasks(State(state): State<AppState>) -> impl IntoResponse {
     get,
     path = "/tasks/{id}",
     responses(
-        (status = 200, description = "task found successfully"),
+        (status = 200, description = "task found successfully", body = TaskSchema),
         (status = 404, description = "task not found")
     ),
     params(
@@ -41,20 +42,20 @@ pub async fn get_task(
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, APIError> {
     let task = state.task_service.find_one_task(&id).await;
-    if task.is_none() {
-        return Err(APIError {
-            message: format!("Task with id {} not found", id),
+    match task {
+        Ok(task) => Ok(Json(json!(task))),
+        Err(e) => Err(APIError {
+            message: e.to_string(),
             status_code: StatusCode::NOT_FOUND,
-        });
+        })
     }
-    Ok(Json(json!(task)))
 }
 
 #[utoipa::path(
     post,
     path = "/tasks",
     responses(
-        (status = 201, description = "Task created successfully")
+        (status = 201, description = "Task created successfully", body = TaskSchema)
     ),
     request_body = CreateTaskSchema
 )]
@@ -85,7 +86,7 @@ pub async fn delete_task(
     match response {
         Ok(_) => Ok(Json(json!({"message": "Task deleted"}))),
         Err(e) => Err(APIError {
-            message: e.message,
+            message: e.to_string(),
             status_code: StatusCode::NOT_FOUND,
         }),
     }
@@ -111,7 +112,7 @@ pub async fn update_task(
     match response {
         Ok(_) => Ok(Json(json!({ "message": "Task updated!" }))),
         Err(e) => Err(APIError {
-            message: e.message,
+            message: e.to_string(),
             status_code: StatusCode::NOT_FOUND,
         }),
     }

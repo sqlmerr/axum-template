@@ -1,6 +1,6 @@
 use crate::repositories::task::{CreateTaskDTO, TaskRepository, UpdateTaskDTO};
 use crate::schemas::task::{CreateTaskSchema, TaskSchema, UpdateTaskSchema};
-use crate::utils::errors::NotFound;
+use crate::utils::errors::{NotFound, AppError};
 
 #[derive(Clone)]
 pub struct TaskService {
@@ -24,11 +24,11 @@ impl TaskService {
         }
     }
 
-    pub async fn find_one_task(&self, id: &i32) -> Option<TaskSchema> {
+    pub async fn find_one_task(&self, id: &i32) -> Result<TaskSchema, AppError> {
         let response = self.repository.find_one(id).await;
         match response {
-            None => None,
-            Some(task) => Some(TaskSchema {
+            None => Err(AppError::EntityNotFound { entity: "Task", id: *id }),
+            Some(task) => Ok(TaskSchema {
                 id: task.id,
                 title: task.title,
                 description: task.description,
@@ -49,23 +49,37 @@ impl TaskService {
         tasks
     }
 
-    pub async fn delete_task(&self, id: &i32) -> Result<(), NotFound> {
+    pub async fn delete_task(&self, id: &i32) -> Result<(), AppError> {
         let task = self.repository.find_one(id).await;
         if task.is_none() {
-            return Err(NotFound {
-                message: format!("Task with id {id} not found").to_string(),
-            });
+            return Err(
+                AppError::EntityNotFound {
+                    entity: "Task",
+                    id: *id
+                }
+            )
         }
 
         self.repository.delete(id).await;
         Ok(())
     }
 
-    pub async fn update_task(&self, id: &i32, data: UpdateTaskSchema) -> Result<(), NotFound> {
+    pub async fn update_task(&self, id: &i32, data: UpdateTaskSchema) -> Result<(), AppError> {
+        let task = self.repository.find_one(id).await;
+        if task.is_none() {
+            return Err(
+                AppError::EntityNotFound {
+                    entity: "Task",
+                    id: *id,
+                }
+            )
+        }
+
         let dto = UpdateTaskDTO {
             title: data.title,
             description: data.description,
         };
-        self.repository.update(id, dto).await
+        self.repository.update(id, dto).await;
+        Ok(())
     }
 }

@@ -27,3 +27,4 @@ http = "1.1.0"
 mime = "0.3.17"
 
 config = "0.14.0"
+thiserror = "1.0.61"

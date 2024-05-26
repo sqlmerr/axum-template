@@ -49,14 +49,9 @@ impl TaskRepository {
             .unwrap();
     }
 
-    pub async fn update(&self, id: &i32, data: UpdateTaskDTO) -> Result<(), NotFound> {
+    pub async fn update(&self, id: &i32, data: UpdateTaskDTO) {
         let db = &self.db_connection;
         let task = self.find_one(id).await;
-        if task.is_none() {
-            return Err(NotFound {
-                message: format!("Task with id {} not found", id),
-            });
-        }
 
         let mut task: task::ActiveModel = task.unwrap().into();
         if let Some(title) = data.title {
@@ -67,7 +62,5 @@ impl TaskRepository {
         }
 
         task.update(db).await.unwrap();
-
-        Ok(())
     }
 }
