@@ -1,4 +1,3 @@
-use crate::db::db_connection;
 use crate::models::task;
 use crate::utils::errors::NotFound;
 use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, Set};
@@ -15,7 +14,7 @@ pub struct UpdateTaskDTO {
 
 #[derive(Clone)]
 pub struct TaskRepository {
-    pub db_connection: DbConn
+    pub db_connection: DbConn,
 }
 
 impl TaskRepository {

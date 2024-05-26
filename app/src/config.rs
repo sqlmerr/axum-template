@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Clone, Debug, Default)]
 pub struct Config {
-    pub database_url: String
+    pub database_url: String,
 }
 
 impl Config {
@@ -11,7 +11,9 @@ impl Config {
 
         config::Config::builder()
             .add_source(config::Environment::default())
-            .build().unwrap()
-            .try_deserialize().unwrap()
+            .build()
+            .unwrap()
+            .try_deserialize()
+            .unwrap()
     }
 }

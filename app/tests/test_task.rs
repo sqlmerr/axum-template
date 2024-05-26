@@ -1,17 +1,23 @@
 use axum::{
     body::Body,
     http::{Request, StatusCode},
+    Router,
 };
 use http_body_util::BodyExt;
 use serde_json::Value;
 use tower::ServiceExt;
 
 use axum_template::schemas::task::UpdateTaskSchema;
-use axum_template::{routes, schemas::task::CreateTaskSchema};
+use axum_template::{routes, schemas::task::CreateTaskSchema, Config};
+
+async fn app() -> Router {
+    let settings = Config::from_env();
+    routes::init_routers(&settings).await
+}
 
 #[tokio::test]
 async fn test_task_create() {
-    let app = routes::init_routers();
+    let app = app().await;
     let data = CreateTaskSchema {
         title: "test".to_string(),
         description: "test_description".to_string(),
@@ -40,7 +46,7 @@ async fn test_task_create() {
 
 #[tokio::test]
 async fn test_task_get_from_many() {
-    let app = routes::init_routers();
+    let app = app().await;
     let response = app
         .oneshot(
             Request::builder()
@@ -63,7 +69,7 @@ async fn test_task_get_from_many() {
 
 #[tokio::test]
 async fn test_task_get() {
-    let app = routes::init_routers();
+    let app = app().await;
     let response = app
         .oneshot(
             Request::builder()
@@ -91,7 +97,7 @@ async fn test_task_update() {
         description: Some("test_description2".to_string()),
     };
 
-    let app = routes::init_routers();
+    let app = app().await;
     let response = app
         .clone()
         .oneshot(

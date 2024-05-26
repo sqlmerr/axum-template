@@ -1,14 +1,13 @@
 mod task;
 
 use axum::{response::Json, routing::get, Router};
-use sea_orm::DbConn;
 use serde_json::json;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::state::AppState;
-use crate::{Config, repositories, schemas, services, utils};
 use crate::db::db_connection;
+use crate::state::AppState;
+use crate::{repositories, schemas, services, utils, Config};
 
 pub async fn init_routers(settings: &Config) -> Router {
     #[derive(OpenApi)]
@@ -31,9 +30,7 @@ pub async fn init_routers(settings: &Config) -> Router {
 
     let db_connection = db_connection(settings).await.unwrap();
 
-    let task_repository = repositories::task::TaskRepository {
-        db_connection: db_connection
-    };
+    let task_repository = repositories::task::TaskRepository { db_connection };
     let task_service = services::task::TaskService {
         repository: task_repository,
     };
