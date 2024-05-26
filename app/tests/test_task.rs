@@ -1,6 +1,6 @@
 use axum::{
     body::Body,
-    http::{Request, StatusCode},
+    http::{header, Request, StatusCode},
     Router,
 };
 use http_body_util::BodyExt;
@@ -28,7 +28,7 @@ async fn test_task_create() {
             Request::builder()
                 .uri("/tasks")
                 .method("POST")
-                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .header(header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .body(serde_json::to_string(&data).unwrap())
                 .unwrap(),
         )
@@ -104,7 +104,7 @@ async fn test_task_update() {
             Request::builder()
                 .uri("/tasks/1")
                 .method("PATCH")
-                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .header(header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .body(serde_json::to_string(&data).unwrap())
                 .unwrap(),
         )

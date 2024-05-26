@@ -1,5 +1,4 @@
 use crate::models::task;
-use crate::utils::errors::NotFound;
 use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, Set};
 
 pub struct CreateTaskDTO {

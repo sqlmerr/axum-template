@@ -23,7 +23,6 @@ utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 migration = {path = "../migration" }
 tower = "0.4.13"
 http-body-util = "0.1.1"
-http = "1.1.0"
 mime = "0.3.17"
 
 config = "0.14.0"

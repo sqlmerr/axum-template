@@ -6,7 +6,6 @@ use axum::{
     Router,
 };
 use serde_json::json;
-use crate::utils::errors::AppError;
 
 use crate::{
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
@@ -47,7 +46,7 @@ pub async fn get_task(
         Err(e) => Err(APIError {
             message: e.to_string(),
             status_code: StatusCode::NOT_FOUND,
-        })
+        }),
     }
 }
 

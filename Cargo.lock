@@ -403,7 +403,6 @@ dependencies = [
  "axum",
  "config",
  "dotenvy",
- "http",
  "http-body-util",
  "migration",
  "mime",

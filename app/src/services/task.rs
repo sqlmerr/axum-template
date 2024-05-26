@@ -1,6 +1,6 @@
 use crate::repositories::task::{CreateTaskDTO, TaskRepository, UpdateTaskDTO};
 use crate::schemas::task::{CreateTaskSchema, TaskSchema, UpdateTaskSchema};
-use crate::utils::errors::{NotFound, AppError};
+use crate::utils::errors::AppError;
 
 #[derive(Clone)]
 pub struct TaskService {
@@ -27,7 +27,10 @@ impl TaskService {
     pub async fn find_one_task(&self, id: &i32) -> Result<TaskSchema, AppError> {
         let response = self.repository.find_one(id).await;
         match response {
-            None => Err(AppError::EntityNotFound { entity: "Task", id: *id }),
+            None => Err(AppError::EntityNotFound {
+                entity: "Task",
+                id: *id,
+            }),
             Some(task) => Ok(TaskSchema {
                 id: task.id,
                 title: task.title,
@@ -52,12 +55,10 @@ impl TaskService {
     pub async fn delete_task(&self, id: &i32) -> Result<(), AppError> {
         let task = self.repository.find_one(id).await;
         if task.is_none() {
-            return Err(
-                AppError::EntityNotFound {
-                    entity: "Task",
-                    id: *id
-                }
-            )
+            return Err(AppError::EntityNotFound {
+                entity: "Task",
+                id: *id,
+            });
         }
 
         self.repository.delete(id).await;
@@ -67,12 +68,10 @@ impl TaskService {
     pub async fn update_task(&self, id: &i32, data: UpdateTaskSchema) -> Result<(), AppError> {
         let task = self.repository.find_one(id).await;
         if task.is_none() {
-            return Err(
-                AppError::EntityNotFound {
-                    entity: "Task",
-                    id: *id,
-                }
-            )
+            return Err(AppError::EntityNotFound {
+                entity: "Task",
+                id: *id,
+            });
         }
 
         let dto = UpdateTaskDTO {
