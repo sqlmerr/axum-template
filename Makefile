@@ -15,3 +15,12 @@ test:
 
 stop-test:
 	docker compose -f docker-compose-test.yaml down
+
+format:
+	cargo fmt
+
+lint/check:
+	cargo clippy
+
+lint/fix:
+	cargo clippy --fix --allow-dirty

@@ -3,11 +3,11 @@ use axum::{
     http::{Request, StatusCode},
 };
 use http_body_util::BodyExt;
-use serde_json::{json, Value};
-use tower::{Service, ServiceExt};
+use serde_json::Value;
+use tower::ServiceExt;
 
-use axum_template::{routes, schemas::task::CreateTaskSchema};
 use axum_template::schemas::task::UpdateTaskSchema;
+use axum_template::{routes, schemas::task::CreateTaskSchema};
 
 #[tokio::test]
 async fn test_task_create() {
@@ -47,7 +47,7 @@ async fn test_task_get_from_many() {
                 .uri("/tasks")
                 .method("GET")
                 .body(Body::empty())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -70,7 +70,7 @@ async fn test_task_get() {
                 .uri("/tasks/1")
                 .method("GET")
                 .body(Body::empty())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -86,17 +86,21 @@ async fn test_task_get() {
 
 #[tokio::test]
 async fn test_task_update() {
-    let data = UpdateTaskSchema { title: Some("test2".to_string()), description: Some("test_description2".to_string()) };
+    let data = UpdateTaskSchema {
+        title: Some("test2".to_string()),
+        description: Some("test_description2".to_string()),
+    };
 
     let app = routes::init_routers();
-    let response = app.clone()
+    let response = app
+        .clone()
         .oneshot(
             Request::builder()
                 .uri("/tasks/1")
                 .method("PATCH")
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .body(serde_json::to_string(&data).unwrap())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -108,13 +112,14 @@ async fn test_task_update() {
 
     assert_eq!(body["message"], "Task updated!".to_string());
 
-    let response2 = app.clone()
+    let response2 = app
+        .clone()
         .oneshot(
             Request::builder()
                 .uri("/tasks/1")
                 .method("GET")
                 .body(Body::empty())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();

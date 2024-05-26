@@ -33,14 +33,12 @@ pub fn init_routers() -> Router {
     };
     let state = AppState { task_service };
 
-    let root_router = Router::new()
+    Router::new()
         .merge(SwaggerUi::new("/docs").url("/openapi.json", ApiDoc::openapi()))
         .route(
             "/",
             get(|| async { Json(json!({"message": "Hello world"})) }),
         )
         .nest("/tasks", task::init_tasks_router())
-        .with_state(state);
-
-    return root_router;
+        .with_state(state)
 }

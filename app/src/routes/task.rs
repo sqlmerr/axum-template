@@ -108,13 +108,13 @@ pub async fn update_task(
     Json(body): Json<UpdateTaskSchema>,
 ) -> Result<impl IntoResponse, APIError> {
     let response = state.task_service.update_task(&id, body).await;
-    return match response {
+    match response {
         Ok(_) => Ok(Json(json!({ "message": "Task updated!" }))),
         Err(e) => Err(APIError {
             message: e.message,
             status_code: StatusCode::NOT_FOUND,
         }),
-    };
+    }
 }
 
 pub fn init_tasks_router() -> Router<AppState> {
