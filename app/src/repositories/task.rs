@@ -1,4 +1,5 @@
 use crate::models::task;
+use super::Repository;
 use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, Set};
 
 pub struct CreateTaskDTO {
@@ -16,8 +17,15 @@ pub struct TaskRepository {
     pub db_connection: DbConn,
 }
 
-impl TaskRepository {
-    pub async fn create(&self, data: CreateTaskDTO) -> task::Model {
+#[async_trait::async_trait]
+impl Repository for TaskRepository {
+    type Model = task::Model;
+    type Id = i32;
+    type CreateDTO = CreateTaskDTO;
+    type UpdateDTO = UpdateTaskDTO;
+
+    async fn create(&self, data: Self::CreateDTO) -> Self::Model
+    {
         let db = &self.db_connection;
         let task = task::ActiveModel {
             title: Set(data.title),
@@ -27,7 +35,7 @@ impl TaskRepository {
         task.insert(db).await.unwrap()
     }
 
-    pub async fn find_one(&self, id: &i32) -> Option<task::Model> {
+    async fn find_one(&self, id: &Self::Id) -> Option<Self::Model> {
         let db = &self.db_connection;
         task::Entity::find_by_id(id.to_owned())
             .one(db)
@@ -35,12 +43,12 @@ impl TaskRepository {
             .unwrap()
     }
 
-    pub async fn find_all(&self) -> Vec<task::Model> {
+    async fn find_all(&self) -> Vec<Self::Model> {
         let db = &self.db_connection;
         task::Entity::find().all(db).await.unwrap()
     }
 
-    pub async fn delete(&self, id: &i32) {
+    async fn delete(&self, id: &Self::Id) {
         let db = &self.db_connection;
         task::Entity::delete_by_id(id.to_owned())
             .exec(db)
@@ -48,7 +56,7 @@ impl TaskRepository {
             .unwrap();
     }
 
-    pub async fn update(&self, id: &i32, data: UpdateTaskDTO) {
+    async fn update(&self, id: &Self::Id, data: Self::UpdateDTO) {
         let db = &self.db_connection;
         let task = self.find_one(id).await;
 
