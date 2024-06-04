@@ -1,12 +1,16 @@
 mod task;
 
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::{response::Json, routing::get, Router};
 use serde_json::json;
 use utoipa::OpenApi;
+use utoipa_scalar::{Scalar, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::db::db_connection;
 use crate::state::AppState;
+use crate::utils::errors::APIError;
 use crate::{repositories, schemas, services, utils, Config};
 
 pub async fn init_routers(settings: &Config) -> Router {
@@ -38,10 +42,19 @@ pub async fn init_routers(settings: &Config) -> Router {
 
     Router::new()
         .merge(SwaggerUi::new("/docs").url("/openapi.json", ApiDoc::openapi()))
+        .merge(Scalar::with_url("/scalar", ApiDoc::openapi()))
         .route(
             "/",
             get(|| async { Json(json!({"message": "Hello world"})) }),
         )
         .nest("/tasks", task::init_tasks_router())
+        .fallback(handler_404)
         .with_state(state)
+}
+
+async fn handler_404() -> impl IntoResponse {
+    (
+        StatusCode::NOT_FOUND,
+        APIError::new(StatusCode::NOT_FOUND, "Not found".to_string()),
+    )
 }

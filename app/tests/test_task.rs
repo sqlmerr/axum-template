@@ -149,7 +149,7 @@ async fn test_task5_delete() {
                 .uri("/tasks/1")
                 .method("DELETE")
                 .body(Body::empty())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -162,7 +162,7 @@ async fn test_task5_delete() {
                 .uri("/tasks/1")
                 .method("GET")
                 .body(Body::empty())
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();

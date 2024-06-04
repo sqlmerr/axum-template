@@ -19,6 +19,7 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 utoipa = { version="4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
+utoipa-scalar = { version = "0.1.0", features = ["axum"] }
 
 migration = {path = "../migration" }
 tower = "0.4.13"

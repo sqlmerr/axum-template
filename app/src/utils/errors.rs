@@ -50,16 +50,15 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let message = self.to_string();
 
-        match self {
-            Self::EntityNotFound { .. } => {
-                APIError::new(StatusCode::NOT_FOUND, message).into_response()
-            }
-            Self::ValidationError(_) => APIError::new(
+        let (status_code, message) = match self {
+            Self::EntityNotFound { .. } => (StatusCode::NOT_FOUND, message),
+            Self::ValidationError(_) => (
                 StatusCode::BAD_REQUEST,
                 format!("Validation errors: [{}", self).replace('\n', ","),
-            )
-            .into_response(),
-            _ => (StatusCode::BAD_REQUEST, self.into_response()).into_response(),
-        }
+            ),
+            _ => (StatusCode::BAD_REQUEST, message),
+        };
+
+        APIError::new(status_code, message).into_response()
     }
 }
