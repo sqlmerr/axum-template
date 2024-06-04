@@ -26,7 +26,6 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:password@db:5432/
-      - RUST_LOG="info,sqlx=error"
     networks:
       - backend
 volumes:

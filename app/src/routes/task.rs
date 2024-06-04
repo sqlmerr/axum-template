@@ -10,7 +10,7 @@ use serde_json::json;
 use crate::{
     schemas::task::{CreateTaskSchema, UpdateTaskSchema},
     state::AppState,
-    utils::errors::APIError,
+    utils::{errors::AppError, validator::ValidatedJson},
 };
 
 #[utoipa::path(
@@ -39,15 +39,9 @@ pub async fn get_all_tasks(State(state): State<AppState>) -> impl IntoResponse {
 pub async fn get_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, APIError> {
-    let task = state.task_service.find_one_task(&id).await;
-    match task {
-        Ok(task) => Ok(Json(json!(task))),
-        Err(e) => Err(APIError {
-            message: e.to_string(),
-            status_code: StatusCode::NOT_FOUND,
-        }),
-    }
+) -> Result<impl IntoResponse, AppError> {
+    let task = state.task_service.find_one_task(&id).await?;
+    Ok(Json(json!(task)))
 }
 
 #[utoipa::path(
@@ -60,7 +54,7 @@ pub async fn get_task(
 )]
 pub async fn create_task(
     State(state): State<AppState>,
-    Json(task): Json<CreateTaskSchema>,
+    ValidatedJson(task): ValidatedJson<CreateTaskSchema>,
 ) -> impl IntoResponse {
     let task = state.task_service.create_task(task).await;
     tracing::info!("Successfully created a task: {:?}", task);
@@ -80,20 +74,15 @@ pub async fn create_task(
 pub async fn delete_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, APIError> {
-    let response = state.task_service.delete_task(&id).await;
-    match response {
-        Ok(_) => Ok(Json(json!({"message": "Task deleted"}))),
-        Err(e) => Err(APIError {
-            message: e.to_string(),
-            status_code: StatusCode::NOT_FOUND,
-        }),
-    }
+) -> Result<impl IntoResponse, AppError> {
+    state.task_service.delete_task(&id).await?;
+    Ok(Json(json!({"message": "Task deleted"})))
 }
 
 #[utoipa::path(
     patch,
     path = "/tasks/{id}",
+    request_body=UpdateTaskSchema,
     responses(
         (status = 200, description = "Task edited successfully"),
         (status = 404, description = "Task not found")
@@ -105,16 +94,10 @@ pub async fn delete_task(
 pub async fn update_task(
     State(state): State<AppState>,
     Path(id): Path<i32>,
-    Json(body): Json<UpdateTaskSchema>,
-) -> Result<impl IntoResponse, APIError> {
-    let response = state.task_service.update_task(&id, body).await;
-    match response {
-        Ok(_) => Ok(Json(json!({ "message": "Task updated!" }))),
-        Err(e) => Err(APIError {
-            message: e.to_string(),
-            status_code: StatusCode::NOT_FOUND,
-        }),
-    }
+    ValidatedJson(body): ValidatedJson<UpdateTaskSchema>,
+) -> Result<impl IntoResponse, AppError> {
+    state.task_service.update_task(&id, body).await?;
+    Ok(Json(json!({ "message": "Task updated!" })))
 }
 
 pub fn init_tasks_router() -> Router<AppState> {

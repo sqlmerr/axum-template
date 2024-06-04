@@ -16,7 +16,7 @@ async fn app() -> Router {
 }
 
 #[tokio::test]
-async fn test_task_create() {
+async fn test_task1_create() {
     let app = app().await;
     let data = CreateTaskSchema {
         title: "test".to_string(),
@@ -45,7 +45,7 @@ async fn test_task_create() {
 }
 
 #[tokio::test]
-async fn test_task_get_from_many() {
+async fn test_task2_get_from_many() {
     let app = app().await;
     let response = app
         .oneshot(
@@ -68,7 +68,7 @@ async fn test_task_get_from_many() {
 }
 
 #[tokio::test]
-async fn test_task_get() {
+async fn test_task3_get() {
     let app = app().await;
     let response = app
         .oneshot(
@@ -91,7 +91,7 @@ async fn test_task_get() {
 }
 
 #[tokio::test]
-async fn test_task_update() {
+async fn test_task4_update() {
     let data = UpdateTaskSchema {
         title: Some("test2".to_string()),
         description: Some("test_description2".to_string()),
@@ -137,4 +137,35 @@ async fn test_task_update() {
 
     assert_eq!(body["title"], "test2".to_string());
     assert_eq!(body["description"], "test_description2".to_string());
+}
+
+#[tokio::test]
+async fn test_task5_delete() {
+    let app = app().await;
+    let response_delete = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/tasks/1")
+                .method("DELETE")
+                .body(Body::empty())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response_delete.status(), StatusCode::OK);
+
+    let response_get = app
+        .oneshot(
+            Request::builder()
+                .uri("/tasks/1")
+                .method("GET")
+                .body(Body::empty())
+                .unwrap()
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response_get.status(), StatusCode::NOT_FOUND);
 }

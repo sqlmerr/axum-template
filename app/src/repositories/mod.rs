@@ -1,8 +1,7 @@
 pub mod task;
 
-
 #[async_trait::async_trait]
-pub trait Repository {
+pub trait Repository: Send + Sync {
     type Model: sea_orm::entity::ModelTrait;
     type Id;
     type CreateDTO;
