@@ -8,14 +8,35 @@ use axum::{
 use serde_json::json;
 
 use crate::{
-    schemas::task::{CreateTaskSchema, UpdateTaskSchema},
+    schemas::task::{CreateTaskSchema, UpdateTaskSchema, TaskSchema},
     state::AppState,
     utils::{errors::AppError, validator::ValidatedJson},
 };
 
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(
+        get_all_tasks,
+        get_task,
+        create_task,
+        delete_task,
+        update_task,
+    ),
+    components(schemas(
+        TaskSchema,
+        CreateTaskSchema,
+        UpdateTaskSchema
+    )),
+    tags(
+        (name = "tasks", description = "Tasks api")
+    )
+)]
+pub(super) struct TaskDoc;
+
 #[utoipa::path(
     get,
-    path = "/tasks",
+    path = "",
+    tag = "tasks",
     responses(
         (status = 200, description = "Tasks", body = Vec<TaskSchema>)
     )
@@ -27,7 +48,8 @@ pub async fn get_all_tasks(State(state): State<AppState>) -> impl IntoResponse {
 
 #[utoipa::path(
     get,
-    path = "/tasks/{id}",
+    path = "/{id}",
+    tag = "tasks",
     responses(
         (status = 200, description = "task found successfully", body = TaskSchema),
         (status = 404, description = "task not found")
@@ -46,7 +68,8 @@ pub async fn get_task(
 
 #[utoipa::path(
     post,
-    path = "/tasks",
+    path = "",
+    tag = "tasks",
     responses(
         (status = 201, description = "Task created successfully", body = TaskSchema)
     ),
@@ -63,7 +86,8 @@ pub async fn create_task(
 
 #[utoipa::path(
     delete,
-    path = "/tasks/{id}",
+    path = "/{id}",
+    tag = "tasks",
     responses(
         (status = 200, description = "Task deleted successfully")
     ),
@@ -81,7 +105,8 @@ pub async fn delete_task(
 
 #[utoipa::path(
     patch,
-    path = "/tasks/{id}",
+    path = "/{id}",
+    tag = "tasks",
     request_body=UpdateTaskSchema,
     responses(
         (status = 200, description = "Task edited successfully"),

@@ -11,22 +11,17 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::db::db_connection;
 use crate::state::AppState;
 use crate::utils::errors::APIError;
-use crate::{repositories, schemas, services, utils, Config};
+use crate::{repositories, services, utils, Config};
+
+use task::TaskDoc;
 
 pub async fn init_routers(settings: &Config) -> Router {
     #[derive(OpenApi)]
     #[openapi(
-        paths(
-            task::get_all_tasks,
-            task::get_task,
-            task::create_task,
-            task::delete_task,
-            task::update_task,
+        nest(
+            (path = "/tasks", api = TaskDoc)
         ),
         components(schemas(
-            schemas::task::TaskSchema,
-            schemas::task::CreateTaskSchema,
-            schemas::task::UpdateTaskSchema,
             utils::errors::APIError
         ))
     )]
